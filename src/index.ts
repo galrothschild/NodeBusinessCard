@@ -1,10 +1,12 @@
 import express, { Request, Response } from 'express';
-const app = express();
+import router from './router/router';
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello World!');
-    });
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/api', router);
 
 app.listen(3000, () => {
-    console.log('Server is listening on http://localhost:3030');
+    console.log('Server is listening on http://localhost:3000');
     });
