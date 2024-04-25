@@ -1,0 +1,10 @@
+{
+	"DB": "MONGODB",
+	"DB_NAME": "galrothschildf",
+	"DB_PASSWORD": "ELYm4fqkoK7mSfed",
+	"JWT_KEY": "my_private_key",
+	"LOGGER": "morgan",
+	"NODE_ENV": "production",
+	"PORT": 9191,
+	"TOKEN_GENERATOR": "jwt"
+}
