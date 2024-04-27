@@ -11,7 +11,9 @@ export const requiredString = {
 export const URL = {
 	type: String,
 	trim: true,
-	RegExp: /^https?:\/\/(www\.)?[a-zA-Z0-9]+\.[a-zA-Z0-9]+(\/[a-zA-Z0-9]+)*$/,
+	match: RegExp(
+		/^https?:\/\/(www\.)?[a-zA-Z0-9]+\.[a-zA-Z0-9]+(\/[a-zA-Z0-9]+)*$/,
+	),
 };
 
 export const imageSchema = new Schema({
