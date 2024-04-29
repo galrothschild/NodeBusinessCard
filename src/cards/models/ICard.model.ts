@@ -6,6 +6,7 @@ import type {
 	inputAddress,
 	inputImage,
 } from "../../common/models";
+import type mongoose from "mongoose";
 
 export type ICard = {
 	_id: string | SchemaDefinitionProperty<string, ICard>;
@@ -19,7 +20,7 @@ export type ICard = {
 	address: Address;
 	bizNumber: number;
 	likes: string[];
-	user_id: string;
+	user_id: mongoose.Schema.Types.ObjectId | string;
 	createdAt: Date;
 	__v: number;
 };

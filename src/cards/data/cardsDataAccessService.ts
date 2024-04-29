@@ -20,9 +20,9 @@ export const getCardByID: (id: string) => Promise<ICard> | Promise<unknown> =
 	async (id) => {
 		if (DB === "MONGODB") {
 			try {
-				const card = (await Card.findById(id)) as ICard;
+				const card = await Card.findById(id);
 				if (card) {
-					return card;
+					return Promise.resolve(card as ICard);
 				}
 				return Promise.reject("Card not found");
 			} catch (error: unknown) {
@@ -85,19 +85,36 @@ export const updateCard: (
 	return Promise.reject("DB not supported");
 };
 
-export const deleteCard: (id: string) => Promise<ICard> | Promise<unknown> =
-	async (id) => {
-		if (DB === "MONGODB") {
-			try {
-				const cardExists = await Card.findById(id);
-				if (!cardExists) {
-					return Promise.reject("Card not found");
-				}
-				const deletedCard = (await Card.findByIdAndDelete(id)) as ICard;
-				return Promise.resolve(deletedCard);
-			} catch (error: unknown) {
-				return Promise.reject(error);
-			}
+export const deleteCard: (
+	id: string,
+	user_id: string,
+) => Promise<string> | Promise<unknown> = async (id, user_id) => {
+	if (DB === "MONGODB") {
+		try {
+			const deletedCard = await Card.findByIdAndDelete(id);
+			return Promise.resolve(deletedCard);
+		} catch (error: unknown) {
+			return Promise.reject(error);
 		}
-		return Promise.reject("DB not supported");
-	};
+	}
+	return Promise.reject("DB not supported");
+};
+
+export const likeCard = async (card: ICard, user_id: string) => {
+	if (DB === "MONGODB") {
+		try {
+			const cardDocument = new Card(card);
+			const userIDIndex = card.likes.indexOf(user_id);
+			if (userIDIndex !== -1) {
+				cardDocument.likes.splice(cardDocument.likes.indexOf(user_id), 1);
+				return await cardDocument.save();
+			}
+			cardDocument.likes.push(user_id);
+			const likedCard = await cardDocument.save();
+			return likedCard;
+		} catch (error: unknown) {
+			return Promise.reject(error);
+		}
+	}
+	return Promise.reject("DB not supported");
+};

@@ -6,5 +6,4 @@ export default function validateCard(card: unknown) {
 	if (validator === "Joi") {
 		return validateCardWithJoi(card);
 	}
-	return false;
 }
