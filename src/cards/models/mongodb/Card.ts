@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 import {
 	URL,
 	addressSchema,
+	imageSchema,
 	requiredString,
 } from "../../../common/mongodb/mongoSchemas";
 import type { ICard } from "../ICard.model";
@@ -19,12 +20,10 @@ const cardSchema = new Schema<ICard>({
 		type: String,
 		required: true,
 		match: RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
+		unique: true,
 	},
 	web: URL,
-	image: {
-		url: URL,
-		alt: { type: String, minLength: 2, maxLength: 255, trim: true },
-	},
+	image: imageSchema,
 	address: addressSchema,
 	bizNumber: {
 		type: Number,

@@ -1,4 +1,5 @@
 import { Schema } from "mongoose";
+import { urlRegex } from "../models";
 
 export const requiredString = {
 	type: String,
@@ -11,9 +12,7 @@ export const requiredString = {
 export const URL = {
 	type: String,
 	trim: true,
-	match: RegExp(
-		/^https?:\/\/(www\.)?[a-zA-Z0-9]+\.[a-zA-Z0-9]+(\/[a-zA-Z0-9]+)*$/,
-	),
+	match: RegExp(urlRegex),
 };
 
 export const imageSchema = new Schema({

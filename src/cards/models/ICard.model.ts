@@ -34,6 +34,5 @@ export type inputICard = {
 	image: inputImage;
 	address: inputAddress;
 	bizNumber: number;
-	likes: string[];
 	user_id: string;
 };
