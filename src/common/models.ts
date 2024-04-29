@@ -3,6 +3,7 @@ export interface Image {
 	alt: string;
 	_id: string;
 }
+export type inputImage = OmitID<Image>;
 
 export interface Address {
 	state: string;
@@ -13,5 +14,7 @@ export interface Address {
 	zip: number;
 	_id: string;
 }
+
+export type inputAddress = OmitID<Address>;
 
 export type OmitID<T> = Omit<T, "_id">;

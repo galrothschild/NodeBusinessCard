@@ -1,4 +1,4 @@
-FROM node:20.12.2-alpine
+FROM node:lts-alpine
 
 # Create app directory
 WORKDIR /app

@@ -16,14 +16,14 @@ services:
     depends_on:
       - mongodb
     ports:
-      - 3000:3000
+      - 8181:8181
     volumes:
       - .:/app
     environment:
       - NODE_ENV=development
     restart: always
-    command: npm run dev
+    command: npm run docker
     expose:
-      - 3000
+      - 8181
 volumes:
   mongodb_data:

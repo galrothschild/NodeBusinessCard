@@ -4,8 +4,9 @@ import {
 	addressSchema,
 	requiredString,
 } from "../../../common/mongodb/mongoSchemas";
+import type { ICard } from "../ICard.model";
 
-const cardSchema = new Schema({
+const cardSchema = new Schema<ICard>({
 	title: requiredString,
 	subtitle: requiredString,
 	description: { ...requiredString, maxLength: 1024 },
@@ -33,7 +34,7 @@ const cardSchema = new Schema({
 		maxLength: 7,
 	},
 	likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-	user_id: { type: Schema.Types.ObjectId, ref: "User" },
+	user_id: Schema.Types.ObjectId,
 	createdAt: { type: Date, default: Date.now },
 });
 
