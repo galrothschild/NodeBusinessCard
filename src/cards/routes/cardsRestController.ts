@@ -80,24 +80,23 @@ router.put("/:id", async (req: Request, res: Response) => {
 		if (!cardFromDB) {
 			return handleError(res, 404, "Card not found", "updating card");
 		}
-		console.log(cardFromDB.user_id.toString(), user_id, isAdmin);
 		if (cardFromDB.user_id.toString() === user_id && isAdmin) {
-			return handleError(res, 403, "Unauthorized", "updating card");
-		}
-		// biome-ignore lint/suspicious/noExplicitAny: to avoid type errors
-		const { error } = validateCard(card) as ValidationResult<any>;
-		if (error) {
-			return handleError(
-				res,
-				400,
-				error.details.map((err) => err.message).join(", "),
-				"updating card",
-			);
-		}
-		const normalizedCard = await normalizeCard(card, user_id);
+			// biome-ignore lint/suspicious/noExplicitAny: to avoid type errors
+			const { error } = validateCard(card) as ValidationResult<any>;
+			if (error) {
+				return handleError(
+					res,
+					400,
+					error.details.map((err) => err.message).join(", "),
+					"updating card",
+				);
+			}
+			const normalizedCard = await normalizeCard(card, user_id);
 
-		const updatedCard = await updateCard(id, normalizedCard);
-		return res.status(200).send(updatedCard);
+			const updatedCard = await updateCard(id, normalizedCard);
+			return res.status(200).send(updatedCard);
+		}
+		return handleError(res, 403, "Unauthorized", "updating card");
 	} catch (error: unknown) {
 		return handleError(res, 500, error, "updating card");
 	}
@@ -124,14 +123,14 @@ router.delete("/:id", async (req: Request, res: Response) => {
 		if (!card) {
 			return handleError(res, 404, "Card not found", "deleting card");
 		}
-		if (card.user_id.toString() !== user_id && !isAdmin) {
-			return handleError(res, 403, "Unauthorized", "deleting card");
+		if (isAdmin || card.user_id.toString() === user_id) {
+			const success = await deleteCard(id, user_id);
+			if (!success) {
+				throw new Error("Error deleting card");
+			}
+			return res.status(200).send("Successfully deleted card");
 		}
-		const success = await deleteCard(id, user_id);
-		if (!success) {
-			throw new Error("Error deleting card");
-		}
-		return res.status(200).send("Successfully deleted card");
+		return handleError(res, 403, "Unauthorized", "deleting card");
 	} catch (error: unknown) {
 		return handleError(res, 500, error, "deleting card");
 	}
