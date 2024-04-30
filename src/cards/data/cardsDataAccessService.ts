@@ -56,7 +56,7 @@ export const createCard: (
 				return Promise.reject("A card with this email already exists.");
 			}
 			const newCard = new Card(card);
-			return await newCard.save();
+			return Promise.resolve(await newCard.save());
 		} catch (error: unknown) {
 			return Promise.reject(error);
 		}

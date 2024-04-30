@@ -1,7 +1,13 @@
-import type { Address, Image } from "../../common/models";
+import type { SchemaDefinitionProperty, Document, ObjectId } from "mongoose";
+import type {
+	Address,
+	Image,
+	inputAddress,
+	inputImage,
+} from "../../common/models";
 
 export type IUser = {
-	_id: string;
+	_id: string | SchemaDefinitionProperty<string, IUser>;
 	name: Name;
 	phone: string;
 	email: string;
@@ -9,7 +15,7 @@ export type IUser = {
 	address: Address;
 	isAdmin: boolean;
 	isBusiness: boolean;
-	createdAt: string;
+	createdAt: Date;
 };
 
 export type Name = {
@@ -17,4 +23,21 @@ export type Name = {
 	middle: string;
 	last: string;
 	_id: string;
+};
+
+export type inputName = {
+	first: string;
+	middle: string;
+	last: string;
+};
+
+export type inputIUser = {
+	name: inputName;
+	phone: string;
+	email: string;
+	password: string;
+	image: inputImage;
+	address: inputAddress;
+	isAdmin: boolean;
+	isBusiness: boolean;
 };
