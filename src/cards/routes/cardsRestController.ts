@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from "express";
+import express, { type Response } from "express";
 import {
 	createCard,
 	deleteCard,
@@ -7,20 +7,24 @@ import {
 	getCardsByUserID,
 	likeCard,
 	updateCard,
-} from "../data/cardsDataAccessService";
+} from "../data/cardsDataAccess.service";
 import { handleError } from "../../common/handleError";
 import { normalizeCard } from "../utils/normalizeCard";
-import validateCard from "../validations/cardValidationService";
+import validateCard from "../validations/cardValidation.service";
 import type { ICard, inputICard } from "../models/ICard.model";
 import type { ValidationResult } from "joi";
+import {
+	auth,
+	type AuthenticatedRequest as Request,
+} from "../../auth/auth.service";
 const router = express.Router();
 // TODO: user_id and isAdmin are hardcoded for testing
 const user_id = "65d9fbba624794ceee4f4b53";
 const isAdmin = false;
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", auth, async (req: Request, res: Response) => {
 	try {
-		// TODO: get user_id from request
+		const user_id = req.user?._id;
 		if (!user_id) {
 			return handleError(res, 403, "Forbidden", "fetching cards");
 		}
@@ -30,9 +34,12 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/my-cards", async (req: Request, res: Response) => {
+router.get("/my-cards", auth, async (req: Request, res: Response) => {
 	try {
-		// TODO: get user_id from request
+		const user_id = req.user?._id;
+		if (!user_id) {
+			return handleError(res, 403, "Forbidden", "fetching cards");
+		}
 		const cards = await getCardsByUserID(user_id);
 		return res.status(200).send(cards);
 	} catch (error: unknown) {
@@ -40,8 +47,12 @@ router.get("/my-cards", async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", auth, async (req: Request, res: Response) => {
 	try {
+		const user_id = req.user?._id;
+		if (!user_id) {
+			return handleError(res, 403, "Forbidden", "fetching card");
+		}
 		return res
 			.status(200)
 			.send(await Promise.resolve(getCardByID(req.params.id)));
@@ -50,10 +61,15 @@ router.get("/:id", async (req: Request, res: Response) => {
 	}
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", auth, async (req: Request, res: Response) => {
 	try {
 		const card = req.body as inputICard;
-		// TODO: get user_id from request
+		const user_id = req.user?._id;
+		const isBusiness = req.user?.isBusiness;
+		if (!user_id || !isBusiness) {
+			return handleError(res, 403, "Forbidden", "creating card");
+		}
+
 		const { error } = validateCard(card) as ValidationResult<unknown>;
 		if (error) {
 			return handleError(
@@ -71,16 +87,20 @@ router.post("/", async (req: Request, res: Response) => {
 	}
 });
 
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", auth, async (req: Request, res: Response) => {
 	try {
 		const card = req.body as inputICard;
 		const id = req.params.id;
-		// TODO: get user_id from request
+		const user_id = req.user?._id;
+		const isAdmin = req.user?.isAdmin;
+		if (!user_id) {
+			return handleError(res, 403, "Forbidden", "updating card");
+		}
 		const cardFromDB = (await getCardByID(id)) as ICard | null;
 		if (!cardFromDB) {
 			return handleError(res, 404, "Card not found", "updating card");
 		}
-		if (cardFromDB.user_id.toString() === user_id && isAdmin) {
+		if (cardFromDB.user_id.toString() === user_id || isAdmin) {
 			// biome-ignore lint/suspicious/noExplicitAny: to avoid type errors
 			const { error } = validateCard(card) as ValidationResult<any>;
 			if (error) {
@@ -101,10 +121,13 @@ router.put("/:id", async (req: Request, res: Response) => {
 		return handleError(res, 500, error, "updating card");
 	}
 });
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", auth, async (req: Request, res: Response) => {
 	try {
 		const id = req.params.id;
-		// TODO: get user_id from request
+		const user_id = req.user?._id;
+		if (!user_id) {
+			return handleError(res, 403, "Forbidden", "liking card");
+		}
 		const card = (await getCardByID(id)) as ICard | null;
 		if (!card) {
 			return handleError(res, 404, "Card not found", "updating card");
@@ -116,9 +139,14 @@ router.patch("/:id", async (req: Request, res: Response) => {
 	}
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", auth, async (req: Request, res: Response) => {
 	try {
 		const id = req.params.id;
+		const user_id = req.user?._id;
+		if (!user_id) {
+			return handleError(res, 403, "Forbidden", "deleting card");
+		}
+		const isAdmin = req.user?.isAdmin;
 		const card = (await getCardByID(id)) as ICard | null;
 		if (!card) {
 			return handleError(res, 404, "Card not found", "deleting card");

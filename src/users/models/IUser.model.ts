@@ -16,6 +16,7 @@ export type IUser = {
 	isAdmin: boolean;
 	isBusiness: boolean;
 	createdAt: Date;
+	password: string;
 };
 
 export type Name = {
@@ -40,4 +41,9 @@ export type inputIUser = {
 	address: inputAddress;
 	isAdmin: boolean;
 	isBusiness: boolean;
+};
+
+export type loginUserType = {
+	email: string;
+	password: string;
 };

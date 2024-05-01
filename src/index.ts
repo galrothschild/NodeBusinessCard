@@ -1,3 +1,5 @@
+import { connectDB } from "./db/db.service";
+import chalk from "chalk";
 import express, {
 	type Request,
 	type Response,
@@ -5,10 +7,7 @@ import express, {
 } from "express";
 import router from "./router/router";
 import cors from "cors";
-import { connectDB } from "./db/dbService";
-import chalk from "chalk";
 import { handleError } from "./common/handleError";
-
 const app = express();
 // Middleware
 app.use(cors());
