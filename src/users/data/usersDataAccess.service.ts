@@ -92,12 +92,18 @@ export const loginUser: (user: {
 	return Promise.reject("DB not supported");
 };
 
-export const doesUserExist: (email: string) => Promise<boolean> = async (
-	email,
+export const doesUserExist: (value: string, type: "email"|"id") => Promise<boolean> = async (
+	value,type
 ) => {
 	if (DB === "MONGODB") {
+		let searchObj;
+		if (type === "email") {
+			searchObj = { email: value };}
+		else if (type === "id") {
+			searchObj = { _id: value };
+		}
 		try {
-			const user = await User.findOne({ email });
+			const user = await User.findOne(searchObj);
 			if (user) {
 				return Promise.resolve(true);
 			}

@@ -34,7 +34,7 @@ router.get("/", auth, async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
 	try {
 		const user = req.body;
-		const userExists = await doesUserExist(user.email);
+		const userExists = await doesUserExist(user.email, "email");
 		if (userExists) {
 			return handleError(res, 400, "User already exists", "registerring user");
 		}
@@ -64,7 +64,7 @@ router.get("/:id", auth, async (req: Request, res: Response) => {
 router.post("/login", async (req: Request, res: Response) => {
 	try {
 		const user: loginUserType = req.body;
-		const userExists = await doesUserExist(user.email);
+		const userExists = await doesUserExist(user.email, "email");
 		if (!userExists) {
 			return handleError(
 				res,
@@ -102,13 +102,14 @@ router.delete("/:id", auth, async (req: Request, res: Response) => {
 		const user_id = req.user?._id;
 		const isAdmin = req.user?.isAdmin;
 		if (isAdmin || user_id === id) {
-			const userExists = await doesUserExist(id);
+			const userExists = await doesUserExist(id, "id");
 			if (!userExists) {
 				return handleError(res, 404, "User not found", "deleting user");
 			}
 			const user = (await getUserByID(id)) as IUser;
+			
 			if (user.isAdmin) {
-				return handleError(res, 403, "Forbidden", "deleting user");
+				return handleError(res, 403, "Can't delete an admin account", "deleting user");
 			}
 			await deleteUser(id);
 			return res.status(204).send("User Deleted Successfully");
