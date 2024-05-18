@@ -8,9 +8,13 @@ import express, {
 import router from "./router/router";
 import cors from "cors";
 import { handleError } from "./common/handleError";
+import logger from "./logger/logger.service";
 const app = express();
 // Middleware
 app.use(cors());
+if (logger) {
+	app.use(logger);
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Routes

@@ -92,14 +92,15 @@ export const loginUser: (user: {
 	return Promise.reject("DB not supported");
 };
 
-export const doesUserExist: (value: string, type: "email"|"id") => Promise<boolean> = async (
-	value,type
-) => {
+export const doesUserExist: (
+	value: string,
+	type: "email" | "id",
+) => Promise<boolean> = async (value, type) => {
 	if (DB === "MONGODB") {
-		let searchObj;
+		let searchObj: { email: string } | { _id: string } = { email: "" };
 		if (type === "email") {
-			searchObj = { email: value };}
-		else if (type === "id") {
+			searchObj = { email: value };
+		} else if (type === "id") {
 			searchObj = { _id: value };
 		}
 		try {

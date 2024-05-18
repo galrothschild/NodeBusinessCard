@@ -74,8 +74,12 @@ router.post("/login", async (req: Request, res: Response) => {
 			);
 		}
 		const token = await loginUser(user);
+		console.log(token);
 		return res.status(200).send(token);
 	} catch (error: unknown) {
+		if (error === "Invalid Email or Password") {
+			return res.status(400).send(error);
+		}
 		return handleError(res, 500, error, "logging in user");
 	}
 });
@@ -107,9 +111,14 @@ router.delete("/:id", auth, async (req: Request, res: Response) => {
 				return handleError(res, 404, "User not found", "deleting user");
 			}
 			const user = (await getUserByID(id)) as IUser;
-			
+
 			if (user.isAdmin) {
-				return handleError(res, 403, "Can't delete an admin account", "deleting user");
+				return handleError(
+					res,
+					403,
+					"Can't delete an admin account",
+					"deleting user",
+				);
 			}
 			await deleteUser(id);
 			return res.status(204).send("User Deleted Successfully");
