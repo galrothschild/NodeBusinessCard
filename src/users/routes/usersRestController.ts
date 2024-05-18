@@ -142,6 +142,7 @@ router.patch("/:id", auth, async (req: Request, res: Response) => {
 			const normalizedUser = {
 				...normalizeUser(user),
 				isBusiness: !user.isBusiness,
+				isAdmin: user.isAdmin,
 			};
 			const patchedUser = await updateUser(id, normalizedUser);
 			return res.status(200).send(patchedUser);

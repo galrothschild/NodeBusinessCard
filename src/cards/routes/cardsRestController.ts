@@ -22,12 +22,8 @@ const router = express.Router();
 const user_id = "65d9fbba624794ceee4f4b53";
 const isAdmin = false;
 
-router.get("/", auth, async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
 	try {
-		const user_id = req.user?._id;
-		if (!user_id) {
-			return handleError(res, 403, "Forbidden", "fetching cards");
-		}
 		return res.status(200).send(await Promise.resolve(getCards()));
 	} catch (error: unknown) {
 		return handleError(res, 500, error, "fetching cards");
@@ -47,12 +43,8 @@ router.get("/my-cards", auth, async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/:id", auth, async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response) => {
 	try {
-		const user_id = req.user?._id;
-		if (!user_id) {
-			return handleError(res, 403, "Forbidden", "fetching card");
-		}
 		return res
 			.status(200)
 			.send(await Promise.resolve(getCardByID(req.params.id)));
