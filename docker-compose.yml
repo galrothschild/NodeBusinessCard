@@ -25,5 +25,11 @@ services:
     command: npm run docker
     expose:
       - 8181
+  client:
+    image: react-bcard
+    container_name: client
+    ports:
+      - 3000:3000
+    
 volumes:
   mongodb_data:
