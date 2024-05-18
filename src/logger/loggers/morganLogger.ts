@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import morgan from "morgan";
 import { currentTime } from "../../common/time.service";
+import { fileLogger } from "../fileLogger.service";
 const logLevel = process.env.LOG_LEVEL || "ERROR";
 export const morganLogger = morgan((tokens, req, res) => {
 	const { year, month, day, hours, minutes, seconds } = currentTime();
@@ -9,12 +10,17 @@ export const morganLogger = morgan((tokens, req, res) => {
 	if (logLevel === "ERROR" && +status < 400) {
 		return;
 	}
-	return [
-		chalk.hex("#34ace0").bold(currentDate),
-		chalk.hex("#ffb142").bold(tokens.method(req, res)),
-		chalk.hex(+status >= 400 ? "#ff5252" : "#2ed573").bold(status),
-		chalk.hex("#2ed573").bold(tokens.url(req, res)),
-		chalk.hex("#fffa65").bold(`${tokens["response-time"](req, res)} ms`),
-		chalk.hex("#ff5252").bold(tokens["remote-addr"](req, res)),
+	const log = [
+		currentDate,
+		tokens.method(req, res),
+		status,
+		tokens.url(req, res),
+		`${tokens["response-time"](req, res)} ms`,
+		tokens["remote-addr"](req, res),
 	].join(" ");
+	if (+status >= 400) {
+		fileLogger(log, `${day}-${month}-${year}`);
+		return chalk.redBright(log);
+	}
+	return chalk.green(log);
 });

@@ -74,7 +74,6 @@ router.post("/login", async (req: Request, res: Response) => {
 			);
 		}
 		const token = await loginUser(user);
-		console.log(token);
 		return res.status(200).send(token);
 	} catch (error: unknown) {
 		if (error === "Invalid Email or Password") {
