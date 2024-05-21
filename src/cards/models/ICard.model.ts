@@ -2,7 +2,6 @@ import type { SchemaDefinitionProperty } from "mongoose";
 import type {
 	Address,
 	Image,
-	OmitID,
 	inputAddress,
 	inputImage,
 } from "../../common/models";
@@ -34,6 +33,6 @@ export type inputICard = {
 	web: string;
 	image: inputImage;
 	address: inputAddress;
-	bizNumber: number;
 	user_id: string;
+	bizNumber?: number;
 };

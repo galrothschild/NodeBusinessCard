@@ -1,5 +1,6 @@
 import { Schema } from "mongoose";
 import { urlRegex } from "../models";
+import { allow } from "joi";
 
 export const requiredString = {
 	type: String,
@@ -17,7 +18,7 @@ export const URL = {
 
 export const imageSchema = new Schema({
 	url: URL,
-	alt: { type: String, minLength: 2, maxLength: 255, trim: true },
+	alt: { type: String, minLength: 2, maxLength: 255, trim: true, allow: "" },
 });
 
 export const addressSchema = new Schema({

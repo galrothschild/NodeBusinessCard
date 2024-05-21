@@ -9,6 +9,7 @@ import router from "./router/router";
 import cors from "cors";
 import { handleError } from "./common/handleError";
 import logger from "./logger/logger.service";
+import { loadInitialData } from "./initialData/initialData.service";
 const app = express();
 // Middleware
 app.use(cors());
@@ -31,6 +32,7 @@ app.listen(PORT, async () => {
 	console.log(chalk.green(`Server is listening on http://localhost:${PORT}`));
 	try {
 		await connectDB();
+		await loadInitialData();
 	} catch (error) {
 		console.log(chalk.redBright("Error connecting to DB"));
 	}

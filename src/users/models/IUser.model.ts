@@ -39,8 +39,8 @@ export type inputIUser = {
 	password: string;
 	image: inputImage;
 	address: inputAddress;
-	isAdmin: boolean;
 	isBusiness: boolean;
+	isAdmin?: boolean;
 };
 
 export type loginUserType = {
