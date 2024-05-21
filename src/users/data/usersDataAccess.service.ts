@@ -73,9 +73,9 @@ export const loginUser: (user: {
 	if (DB === "MONGODB") {
 		const { email, password } = user;
 		try {
-			const userFromDB = (await User.findOne({ email }).select(
-				"+password",
-			)) as IUser;
+			const userFromDB = (await User.findOne({
+				email: email.toLowerCase(),
+			}).select("+password")) as IUser;
 			const isValidPassword = await bcrypt.compare(
 				pepper + password,
 				userFromDB.password,
@@ -99,7 +99,7 @@ export const doesUserExist: (
 	if (DB === "MONGODB") {
 		let searchObj: { email: string } | { _id: string } = { email: "" };
 		if (type === "email") {
-			searchObj = { email: value };
+			searchObj = { email: value.toLowerCase() };
 		} else if (type === "id") {
 			searchObj = { _id: value };
 		}

@@ -10,7 +10,7 @@ export const normalizeUser = (user: inputIUser) => {
 	const normalizedUser = {
 		name: user.name,
 		phone: user.phone,
-		email: user.email,
+		email: user.email.toLowerCase(),
 		password: user.password,
 		address: user.address,
 		image: image,

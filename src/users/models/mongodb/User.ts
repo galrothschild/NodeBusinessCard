@@ -5,6 +5,7 @@ import {
 	requiredString,
 } from "../../../common/mongodb/mongoSchemas";
 import bcrypt from "bcrypt";
+import type { inputIUser } from "../IUser.model";
 
 const nameSchema = new Schema({
 	first: requiredString,
@@ -64,6 +65,18 @@ userSchema.pre("save", async function (next) {
 	// hash the password
 	const hash = await bcrypt.hash(pepper + this.password, 10);
 	this.password = hash;
+	next();
+});
+userSchema.pre("insertMany", async (next, docs: inputIUser[]) => {
+	try {
+		await Promise.all(
+			docs.map(async (doc) => {
+				doc.password = await bcrypt.hash(pepper + doc.password, 10);
+			}),
+		);
+	} catch (error) {
+		console.error(error);
+	}
 	next();
 });
 
