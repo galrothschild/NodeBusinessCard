@@ -1,5 +1,6 @@
 import express, { type Response } from "express";
 import {
+	checkUserLockStatus,
 	deleteUser,
 	doesUserExist,
 	getUserByID,
@@ -72,6 +73,10 @@ router.post("/login", async (req: Request, res: Response) => {
 				"Invalid Username or Password",
 				"logging in user",
 			);
+		}
+		const isLocked = await checkUserLockStatus(user.email);
+		if (isLocked) {
+			return handleError(res, 403, "User is Locked", "logging in user");
 		}
 		const token = await loginUser(user);
 		return res.status(200).send(token);

@@ -53,8 +53,16 @@ const userSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
+	failCount: {
+		type: Number,
+		default: 0,
+	},
+	lockedUntil: Number,
 });
 
+userSchema.virtual("isLocked").get(function () {
+	return !!(this.lockedUntil && this.lockedUntil > Date.now());
+});
 const pepper = process.env.PEPPER || "pepper";
 
 // hashing the password before saving a user (if the password is modified)

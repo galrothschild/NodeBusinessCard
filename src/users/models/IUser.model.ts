@@ -16,6 +16,9 @@ export type IUser = {
 	isAdmin: boolean;
 	isBusiness: boolean;
 	createdAt: Date;
+	failCount: number;
+	isLocked: boolean;
+	lockedUntil: number | undefined;
 	password: string;
 };
 

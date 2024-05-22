@@ -76,14 +76,39 @@ export const loginUser: (user: {
 			const userFromDB = (await User.findOne({
 				email: email.toLowerCase(),
 			}).select("+password")) as IUser;
+			const id = userFromDB._id;
 			const isValidPassword = await bcrypt.compare(
 				pepper + password,
 				userFromDB.password,
 			);
 			if (isValidPassword) {
 				const token = generateToken(userFromDB);
+				await User.findByIdAndUpdate(id, {
+					failCount: 0,
+					lockedUntil: undefined,
+				});
 				return Promise.resolve(token);
 			}
+			if (userFromDB.isAdmin) {
+				return Promise.reject("Invalid Email or Password");
+			}
+			if (userFromDB.failCount >= 3) {
+				await User.findByIdAndUpdate(id, {
+					lockedUntil: Date.now() + 15 * 60 * 1000,
+					failCount: 0,
+				});
+
+				return Promise.reject(
+					"User locked after 3 attempts, please try again after 15 minutes",
+				);
+			}
+			await User.findByIdAndUpdate(
+				id,
+				{
+					$inc: { failCount: 1 },
+				},
+				{ new: true },
+			);
 			return Promise.reject("Invalid Email or Password");
 		} catch (error: unknown) {
 			return Promise.reject(error);
@@ -116,12 +141,23 @@ export const doesUserExist: (
 	return Promise.reject("DB not supported");
 };
 
-export const deleteUser: (id: string) => Promise<IUser> | Promise<unknown> = (
-	id,
-) => {
+export const deleteUser: (id: string) => Promise<IUser> | Promise<unknown> =
+	async (id) => {
+		if (DB === "MONGODB") {
+			try {
+				return await User.findByIdAndDelete(id);
+			} catch (error: unknown) {
+				return Promise.reject(error);
+			}
+		}
+		return Promise.reject("DB not supported");
+	};
+
+export const checkUserLockStatus = async (email: string) => {
 	if (DB === "MONGODB") {
 		try {
-			return User.findByIdAndDelete(id);
+			const { isLocked } = (await User.findOne({ email })) as IUser;
+			return isLocked;
 		} catch (error: unknown) {
 			return Promise.reject(error);
 		}
