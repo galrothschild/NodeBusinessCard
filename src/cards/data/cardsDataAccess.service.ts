@@ -32,12 +32,17 @@ export const getCardByID: (id: string) => Promise<ICard> | Promise<unknown> =
 		return Promise.reject("DB not supported");
 	};
 
-export const getCardsByUserID: (
-	user_id: string,
-) => Promise<ICard[]> | Promise<unknown> = async (user_id) => {
+export const getCardsByParam: (
+	value: string | number,
+	param: "user_id" | "bizNumber",
+) => Promise<ICard[]> | Promise<unknown> = async (value, param) => {
 	if (DB === "MONGODB") {
 		try {
-			const cards = (await Card.find({ user_id })) as ICard[];
+			if (param === "bizNumber") {
+				const cards = (await Card.find({ bizNumber: value })) as ICard[];
+				return cards.length > 0;
+			}
+			const cards = (await Card.find({ user_id: value })) as ICard[];
 			return cards;
 		} catch (error: unknown) {
 			return Promise.reject(error);
@@ -70,10 +75,6 @@ export const updateCard: (
 ) => Promise<ICard> | Promise<unknown> = async (id, card) => {
 	if (DB === "MONGODB") {
 		try {
-			const cardExists = await Card.findById(id);
-			if (!cardExists) {
-				return Promise.reject("Card not found");
-			}
 			const updatedCard = (await Card.findByIdAndUpdate(id, card, {
 				new: true,
 			})) as ICard;
@@ -117,4 +118,22 @@ export const likeCard = async (card: ICard, user_id: string) => {
 		}
 	}
 	return Promise.reject("DB not supported");
+};
+
+export const patchCardBusinessNumber = async (
+	id: string,
+	bizNumber: number,
+) => {
+	if (DB === "MONGODB") {
+		try {
+			const updatedCard = await Card.findByIdAndUpdate(
+				id,
+				{ bizNumber: bizNumber },
+				{ new: true },
+			);
+			return updatedCard;
+		} catch (error: unknown) {
+			return Promise.reject(error);
+		}
+	}
 };

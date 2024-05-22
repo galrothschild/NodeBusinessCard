@@ -84,6 +84,12 @@ router.post("/login", async (req: Request, res: Response) => {
 		if (error === "Invalid Email or Password") {
 			return res.status(400).send(error);
 		}
+		if (
+			error ===
+			"User locked after 3 attempts, please try again after 15 minutes"
+		) {
+			return res.status(403).send(error);
+		}
 		return handleError(res, 500, error, "logging in user");
 	}
 });

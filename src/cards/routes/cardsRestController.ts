@@ -1,11 +1,12 @@
-import express, { type Response } from "express";
+import express, { type NextFunction, type Response } from "express";
 import {
 	createCard,
 	deleteCard,
 	getCardByID,
 	getCards,
-	getCardsByUserID,
+	getCardsByParam,
 	likeCard,
+	patchCardBusinessNumber,
 	updateCard,
 } from "../data/cardsDataAccess.service";
 import { handleError } from "../../common/handleError";
@@ -18,10 +19,8 @@ import {
 	type AuthenticatedRequest as Request,
 } from "../../auth/auth.service";
 const router = express.Router();
-// TODO: user_id and isAdmin are hardcoded for testing
-const user_id = "65d9fbba624794ceee4f4b53";
-const isAdmin = false;
 
+// get all cards
 router.get("/", async (req: Request, res: Response) => {
 	try {
 		return res.status(200).send(await Promise.resolve(getCards()));
@@ -30,19 +29,21 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
+// get my cards
 router.get("/my-cards", auth, async (req: Request, res: Response) => {
 	try {
 		const user_id = req.user?._id;
 		if (!user_id) {
 			return handleError(res, 403, "Forbidden", "fetching cards");
 		}
-		const cards = await getCardsByUserID(user_id);
+		const cards = await getCardsByParam(user_id, "user_id");
 		return res.status(200).send(cards);
 	} catch (error: unknown) {
 		return handleError(res, 500, error, "fetching cards");
 	}
 });
 
+// get card by id
 router.get("/:id", async (req: Request, res: Response) => {
 	try {
 		return res
@@ -53,6 +54,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 	}
 });
 
+// create card
 router.post("/", auth, async (req: Request, res: Response) => {
 	try {
 		const card = req.body as inputICard;
@@ -79,6 +81,7 @@ router.post("/", auth, async (req: Request, res: Response) => {
 	}
 });
 
+// update card by id
 router.put("/:id", auth, async (req: Request, res: Response) => {
 	try {
 		const card = req.body as inputICard;
@@ -113,24 +116,35 @@ router.put("/:id", auth, async (req: Request, res: Response) => {
 		return handleError(res, 500, error, "updating card");
 	}
 });
-router.patch("/:id", auth, async (req: Request, res: Response) => {
-	try {
-		const id = req.params.id;
-		const user_id = req.user?._id;
-		if (!user_id) {
-			return handleError(res, 403, "Forbidden", "liking card");
-		}
-		const card = (await getCardByID(id)) as ICard | null;
-		if (!card) {
-			return handleError(res, 404, "Card not found", "updating card");
-		}
-		const likedCard = await likeCard(card, user_id);
-		return res.status(200).send(likedCard);
-	} catch (error: unknown) {
-		return handleError(res, 500, error, "liking card");
-	}
-});
 
+// like card (if bizNumber is not provided)
+router.patch(
+	"/:id",
+	auth,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { bizNumber } = req.body as { bizNumber: number };
+			if (bizNumber) {
+				return next();
+			}
+			const id = req.params.id;
+			const user_id = req.user?._id;
+			if (!user_id) {
+				return handleError(res, 403, "Forbidden", "liking card");
+			}
+			const card = (await getCardByID(id)) as ICard | null;
+			if (!card) {
+				return handleError(res, 404, "Card not found", "updating card");
+			}
+			const likedCard = await likeCard(card, user_id);
+			return res.status(200).send(likedCard);
+		} catch (error: unknown) {
+			return handleError(res, 500, error, "liking card");
+		}
+	},
+);
+
+// delete card by id
 router.delete("/:id", auth, async (req: Request, res: Response) => {
 	try {
 		const id = req.params.id;
@@ -153,6 +167,58 @@ router.delete("/:id", auth, async (req: Request, res: Response) => {
 		return handleError(res, 403, "Unauthorized", "deleting card");
 	} catch (error: unknown) {
 		return handleError(res, 500, error, "deleting card");
+	}
+});
+
+// Patch card business number
+router.patch("/:id", auth, async (req: Request, res: Response) => {
+	try {
+		const id = req.params.id;
+		const user_id = req.user?._id;
+		const isAdmin = req.user?.isAdmin;
+		const { bizNumber } = req.body as { bizNumber: number };
+		if (!user_id || !isAdmin) {
+			return handleError(
+				res,
+				403,
+				"Forbidden",
+				"updating card business number",
+			);
+		}
+		const card = (await getCardByID(id)) as ICard | null;
+		if (!card) {
+			return handleError(
+				res,
+				404,
+				"Card not found",
+				"updating card business number",
+			);
+		}
+		if (bizNumber > 10_000_000 || bizNumber < 9_000_000) {
+			return handleError(
+				res,
+				400,
+				"Business number must be between 9,000,000 and 10,000,000",
+				"updating card business number",
+			);
+		}
+		const isBizNumberTaken = (await getCardsByParam(
+			bizNumber,
+			"bizNumber",
+		)) as ICard[];
+		console.log(isBizNumberTaken);
+		if (isBizNumberTaken) {
+			return handleError(
+				res,
+				400,
+				"Business number is already taken",
+				"updating card business number",
+			);
+		}
+		const updatedCard = await patchCardBusinessNumber(id, bizNumber);
+		return res.status(200).send(updatedCard);
+	} catch (error: unknown) {
+		return handleError(res, 500, error, "updating card");
 	}
 });
 export default router;
