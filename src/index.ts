@@ -12,7 +12,15 @@ import logger from "./logger/logger.service";
 import { loadInitialData } from "./initialData/initialData.service";
 const app = express();
 // Middleware
-app.use(cors());
+app.use(
+	cors({
+		origin: [
+			"http://localhost:3000",
+			"http://localhost:8080",
+			"http://localhost:5050",
+		],
+	}),
+);
 if (logger) {
 	app.use(logger);
 }
