@@ -206,7 +206,6 @@ router.patch("/:id", auth, async (req: Request, res: Response) => {
 			bizNumber,
 			"bizNumber",
 		)) as ICard[];
-		console.log(isBizNumberTaken);
 		if (isBizNumberTaken) {
 			return handleError(
 				res,
