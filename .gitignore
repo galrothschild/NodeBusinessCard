@@ -4,4 +4,4 @@ docker-compose.yml
 Dockerfile
 *.env
 .dockerignore
-logs
+logs/*
