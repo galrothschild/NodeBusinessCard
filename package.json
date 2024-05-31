@@ -2,6 +2,9 @@
 	"name": "nodebusinesscard",
 	"version": "1.0.0",
 	"main": "index.js",
+	"engines": {
+		"node": ">=20.9.0"
+	},
 	"scripts": {
 		"build": "npx tsc",
 		"prestart": "npm run build",
