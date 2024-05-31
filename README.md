@@ -1,6 +1,7 @@
 # Business Card API
 
 This project is a Node.js API built with Express, enabling users to create and manage business cards. It supports various user roles, including business users, admin users, and regular users.
+You can read the documentation here: https://documenter.getpostman.com/view/34926651/2sA3QqesJn
 
 ## Features
 

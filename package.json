@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "npx tsc",
 		"prestart": "npm run build",
-		"start": "node --env-file=.dev.env dist/index.js",
+		"start": "node --env-file=.env dist/index.js",
 		"dev": "nodemon -L --env-file=.dev.env --env-file=.env src/index.ts",
 		"docker": "nodemon -L --env-file=.dev.env --env-file=.env --env-file=.docker.env src/index.ts"
 	},
