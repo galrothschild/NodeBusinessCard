@@ -2,20 +2,25 @@ import express, { type Response } from "express";
 import {
 	checkUserLockStatus,
 	deleteUser,
+	doesGoogleUserExist,
 	doesUserExist,
 	getUserByID,
 	getUsers,
+	loginGoogleUser,
 	loginUser,
+	registerGoogleUser,
 	registerUser,
 	updateUser,
 } from "../data/usersDataAccess.service";
 import { handleError } from "../../common/handleError";
 import { normalizeUser } from "../utils/normalizeUser";
-import type { IUser, loginUserType } from "../models/IUser.model";
+import type { IUser, inputName, loginUserType } from "../models/IUser.model";
 import {
 	auth,
 	type AuthenticatedRequest as Request,
 } from "../../auth/auth.service";
+import { authorizeUrl, oAuth2Client } from "../../auth/Providers/googleAuth";
+import { decodedToken } from "../../auth/Providers/jwt";
 
 const router = express.Router();
 
@@ -57,7 +62,6 @@ router.get("/:id", auth, async (req: Request, res: Response) => {
 		}
 		return handleError(res, 403, "Forbidden", "getting user");
 	} catch (error: unknown) {
-		console.log(error);
 		return handleError(res, 404, error, "getting user");
 	}
 });
@@ -164,4 +168,39 @@ router.patch("/:id", auth, async (req: Request, res: Response) => {
 	}
 });
 
+// google auth
+
+router.get("/auth/google", (req, res) => {
+	res.send(authorizeUrl);
+});
+
+router.get("/auth/google/callback", async (req: Request, res: Response) => {
+	try {
+		const code = req.query.code;
+		const { tokens } = await oAuth2Client.getToken(code as string);
+		oAuth2Client.setCredentials(tokens);
+		const ticket = await oAuth2Client.verifyIdToken({
+			idToken: tokens.id_token as string,
+			audience: process.env.GOOGLE_CLIENT_ID,
+		});
+		const payload = ticket.getPayload();
+		if (!payload) {
+			return handleError(res, 400, "Invalid Token", "authenticating user");
+		}
+		const userExists = await doesGoogleUserExist(payload.email as string);
+		if (!userExists) {
+			const newUser = await registerGoogleUser({
+				email: payload.email as string,
+				name: payload.name as string,
+				image: payload.picture as string,
+			});
+		}
+		const token = await loginGoogleUser(payload.email as string);
+		return res.redirect("http://localhost:3000/?token="); // redirect to login page
+	} catch (error: unknown) {
+		return handleError(res, 500, error, "authenticating user");
+	}
+});
+
+router.get("/auth/google/login/:id", async (req: Request, res: Response) => {});
 export default router;

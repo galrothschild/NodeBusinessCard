@@ -1,5 +1,7 @@
+import { ObjectId } from "mongoose";
 import { generateToken } from "../../auth/Providers/jwt";
 import type { IUser, inputIUser } from "../models/IUser.model";
+import GoogleUser from "../models/mongodb/GoogleUser";
 import User from "../models/mongodb/User";
 import bcrypt from "bcrypt";
 
@@ -17,6 +19,34 @@ export const registerUser: (
 		}
 	}
 	return Promise.reject("DB not supported");
+};
+
+export const registerGoogleUser: (user: {
+	email: string;
+	name: string;
+	image: string;
+}) => Promise<IUser> | Promise<unknown> = async (user) => {
+	if (DB === "MONGODB") {
+		const googleUserExists = await GoogleUser.findOne({ email: user.email });
+		console.log(googleUserExists);
+
+		try {
+			const newUser = new GoogleUser(user);
+			return Promise.resolve(await newUser.save());
+		} catch (error: unknown) {
+			return Promise.reject(error);
+		}
+	}
+	return Promise.reject("DB not supported");
+};
+
+export const doesGoogleUserExist = async (email: string) => {
+	try {
+		const user = await GoogleUser.findOne({ email });
+		return !!user;
+	} catch (error: unknown) {
+		return Promise.reject(error);
+	}
 };
 
 export const updateUser: (
@@ -65,6 +95,27 @@ export const getUsers: () => Promise<IUser[]> | Promise<unknown> = async () => {
 };
 
 const pepper = process.env.PEPPER || "pepper";
+
+export const loginGoogleUser: (email: string) => Promise<string | undefined> =
+	async (email) => {
+		if (DB === "MONGODB") {
+			try {
+				const user = await GoogleUser.findOne({ email });
+				if (user) {
+					return Promise.resolve(
+						generateToken({
+							_id: user._id,
+							isAdmin: false,
+							isBusiness: false,
+						}),
+					);
+				}
+			} catch (error: unknown) {
+				return Promise.reject(error);
+			}
+			return Promise.reject("User not found");
+		}
+	};
 
 export const loginUser: (user: {
 	email: string;

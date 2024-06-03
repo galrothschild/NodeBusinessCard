@@ -10,7 +10,7 @@ import cors from "cors";
 import { handleError } from "./common/handleError";
 import logger from "./logger/logger.service";
 import { loadInitialData } from "./initialData/initialData.service";
-const app = express();
+export const app = express();
 // Middleware
 app.use(
 	cors({
