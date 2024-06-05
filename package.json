@@ -20,6 +20,7 @@
 		"chalk": "^4.1.2",
 		"cors": "^2.8.5",
 		"express": "^4.19.2",
+		"express-rate-limit": "^7.3.0",
 		"google-auth-library": "^9.10.0",
 		"joi": "^17.13.0",
 		"jsonwebtoken": "^9.0.2",

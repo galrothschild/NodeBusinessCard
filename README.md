@@ -13,6 +13,7 @@ You can read the documentation here: https://documenter.getpostman.com/view/3492
   - Edit User
   - Delete User
   - Patch User's Business Status
+  - Login with google
 - **Cards:**
   - Get Cards
   - Get User's Cards
@@ -26,6 +27,8 @@ You can read the documentation here: https://documenter.getpostman.com/view/3492
 ## Authentication
 
 The API uses JWT for authentication. Tokens include properties for user roles (`isBusiness`, `isAdmin`) and user ID. Authorization middleware ensures appropriate permissions for protected endpoints.
+
+In addition there's a cors policy that will allow only approved IPs to send requests, and a rate limiter that won't allow more than 100 requests per second
 
 There is also an option for logging in with google with google's auth library with oauth2. It requires the frontend to have a login with google button that sends a get request to /users/auth/google and redirects to the url provided from that endpoint. it then continues with google's authentication and confirmation, then it will redirect to an endpoint in the front end called /google-login with a token in the url params, take that token and login with it in the front end.
 
@@ -75,6 +78,21 @@ src
 - `GOOGLE_CALLBACK_URL=http://localhost:8181/users/auth/google/callback` # The URL for the callback needs to be the URL you are hosting the API on /users/auth/google/callback
 - `FRONTEND_URL=http://localhost:3000` # Also needs to be adjusted per your frontend domain or port if in dev
 
+Copy pastable .env example:
+```
+PORT=8181
+MONGO_URI=mongodb://localhost:27017/business-card-app
+TOKEN_GENERATOR=jwt
+LOGGER=morgan
+DB=MONGODB
+PEPPER=pepper
+LOG_LEVEL=INFO
+TOKEN_SECRET=secret-key
+GOOGLE_CLIENT_ID=xxxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=XXXXXXXX
+GOOGLE_CALLBACK_URL=http://localhost:8181/users/auth/google/callback
+FRONTEND_URL=http://localhost:3000
+```
 ## Error Handling and Logging
 
 Errors are logged using Morgan and handled by middleware. Errors with a status code above 400 are logged to `logs/<Date>.log`.
@@ -91,6 +109,7 @@ Errors are logged using Morgan and handled by middleware. Errors with a status c
 - `mongoose`
 - `morgan`
 - `google-auth-library`
+- `express-rate-limit`
 
 ## Dev Dependencies
 

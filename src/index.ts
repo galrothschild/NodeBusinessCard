@@ -10,20 +10,20 @@ import cors from "cors";
 import { handleError } from "./common/handleError";
 import logger from "./logger/logger.service";
 import { loadInitialData } from "./initialData/initialData.service";
+import { corsLimitation, limiter } from "./utils";
 export const app = express();
 // Middleware
-app.use(
-	cors({
-		origin: [
-			"http://localhost:3000",
-			"http://localhost:8080",
-			"http://localhost:5050",
-		],
-	}),
-);
+// cors limitation
+app.use(corsLimitation);
+// rate limiter for 100 requests per second
+app.use(limiter);
+// logger
 if (logger) {
 	app.use(logger);
 }
+// public folder for static files
+app.use(express.static("public"));
+// body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Routes
