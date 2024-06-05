@@ -74,6 +74,10 @@ export const getUserByID: (id: string) => Promise<IUser> | Promise<unknown> =
 				if (user) {
 					return Promise.resolve(user);
 				}
+				const googleUser = await GoogleUser.findById(id);
+				if (googleUser) {
+					return Promise.resolve(googleUser);
+				}
 				return Promise.reject("User not found");
 			} catch (error: unknown) {
 				return Promise.reject({ error });

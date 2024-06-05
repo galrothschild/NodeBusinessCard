@@ -44,6 +44,15 @@ router.post("/", async (req: Request, res: Response) => {
 		if (userExists) {
 			return handleError(res, 400, "User already exists", "registerring user");
 		}
+		const googleUserExists = await doesGoogleUserExist(user.email);
+		if (googleUserExists) {
+			return handleError(
+				res,
+				400,
+				"User already exists with Google Account",
+				"registerring user",
+			);
+		}
 		const normalizedUser = normalizeUser(user);
 		const newUser = await registerUser(normalizedUser);
 		return res.status(201).json(newUser);
@@ -196,7 +205,11 @@ router.get("/auth/google/callback", async (req: Request, res: Response) => {
 			});
 		}
 		const token = await loginGoogleUser(payload.email as string);
-		return res.redirect("http://localhost:3000/?token="); // redirect to login page
+		return res.redirect(
+			`${
+				process.env.FRONTEND_URL || "localhost:3000"
+			}/#/google-login/?token=${token}`,
+		); // redirect to login page
 	} catch (error: unknown) {
 		return handleError(res, 500, error, "authenticating user");
 	}
