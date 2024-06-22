@@ -6,12 +6,17 @@ import express, {
 	type NextFunction,
 } from "express";
 import router from "./router/router";
-import cors from "cors";
 import { handleError } from "./common/handleError";
 import logger from "./logger/logger.service";
 import { loadInitialData } from "./initialData/initialData.service";
 import { corsLimitation, limiter } from "./utils";
 export const app = express();
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env" });
+if (process.env.NODE_ENV !== "production") {
+	dotenv.config({ path: ".dev.env" });
+}
 // Middleware
 // cors limitation
 app.use(corsLimitation);

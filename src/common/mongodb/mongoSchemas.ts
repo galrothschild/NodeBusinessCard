@@ -1,6 +1,5 @@
 import { Schema } from "mongoose";
 import { urlRegex } from "../models";
-import { allow } from "joi";
 
 export const requiredString = {
 	type: String,
