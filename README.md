@@ -130,7 +130,7 @@ Errors are logged using Morgan and handled by middleware. Errors with a status c
 
 1. Clone the repo:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/galrothschild/NodeBusinessCard.git
     ```
 2. Install dependencies:
     ```bash
